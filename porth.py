@@ -891,13 +891,13 @@ def generate_nasm_linux_arm32(program: Program, out_file_path: str):
             if op.typ in [OpType.PUSH_INT, OpType.PUSH_BOOL, OpType.PUSH_PTR]:
                 assert isinstance(op.operand, int), f"This could be a bug in the parsing step {op.operand}"
                 out.write("// [OpType.PUSH_INT, OpType.PUSH_BOOL, OpType.PUSH_PTR]\n")
-                out.write("    movw r1, #%d\n" % op.operand)
+                out.write("    movw r1, #%d\n" % (int(op.operand) & 0xFFFF))
                 out.write("    push {r1}\n")
             elif op.typ == OpType.PUSH_STR:
                 out.write("// PUSH_STR\n")
                 assert isinstance(op.operand, str), "This could be a bug in the parsing step"
                 value = op.operand.encode('utf-8')
-                n = len(value)
+                n = len(value) & 0xFFFF
                 out.write("    movw r1, #%d\n" % n)
                 out.write("    push {r1}\n")
                 out.write("    ldr r1, =str_%d\n" % len(strs))
@@ -914,6 +914,7 @@ def generate_nasm_linux_arm32(program: Program, out_file_path: str):
                 out.write("// PUSH_MEM\n")
                 assert isinstance(op.operand, MemAddr), "This could be a bug in the parsing step"
                 out.write("    ldr r1, =mem\n")
+                out.write("    add r1, #%d\n" % (op.operand & 0xff))
                 out.write("    push {r1}\n")
             elif op.typ == OpType.PUSH_LOCAL_MEM:
                 out.write("// PUSH_LOCAL_MEM\n")
@@ -1022,7 +1023,8 @@ def generate_nasm_linux_arm32(program: Program, out_file_path: str):
                     out.write("    rsbs r1, r1, #1\n")
                     out.write("    movcc r1, #0\n")
                     out.write("    push {r1}\n")
-                # elif op.operand == Intrinsic.PRINT:
+                elif op.operand == Intrinsic.PRINT:
+                    pass
                     # out.write("    pop rdi\n")
                     # out.write("    call print\n")
                 elif op.operand == Intrinsic.EQ:
@@ -1064,74 +1066,78 @@ def generate_nasm_linux_arm32(program: Program, out_file_path: str):
                     out.write("    movne r1, #1\n")
                     out.write("    push {r1}\n")
                 elif op.operand == Intrinsic.DUP:
-                    out.write("    pop rax\n")
-                    out.write("    push rax\n")
-                    out.write("    push rax\n")
+                    out.write("    pop {r1}\n")
+                    out.write("    push {r1}\n")
+                    out.write("    push {r1}\n")
                 elif op.operand == Intrinsic.SWAP:
-                    out.write("    pop rax\n")
-                    out.write("    pop rbx\n")
-                    out.write("    push rax\n")
-                    out.write("    push rbx\n")
+                    out.write("    pop {r1, r2}\n")
+                    out.write("    push {r2}\n")
+                    out.write("    push {r1}\n")
                 elif op.operand == Intrinsic.DROP:
                     out.write("    pop {r1}\n")
                 elif op.operand == Intrinsic.OVER:
-                    out.write("    pop rax\n")
-                    out.write("    pop rbx\n")
-                    out.write("    push rbx\n")
-                    out.write("    push rax\n")
-                    out.write("    push rbx\n")
+                    out.write("    pop {r1, r2}\n")
+                    out.write("    push {r2}\n")
+                    out.write("    push {r1, r2}\n")
                 elif op.operand == Intrinsic.ROT:
-                    out.write("    pop rax\n")
-                    out.write("    pop rbx\n")
-                    out.write("    pop rcx\n")
-                    out.write("    push rbx\n")
-                    out.write("    push rax\n")
-                    out.write("    push rcx\n")
+                    out.write("    pop {r1, r2, r3}\n")
+                    out.write("    push {r2}\n")
+                    out.write("    push {r1}\n")
+                    out.write("    push {r3}\n")
                 elif op.operand == Intrinsic.LOAD8:
-                    out.write("    pop rax\n")
-                    out.write("    xor rbx, rbx\n")
-                    out.write("    mov bl, [rax]\n")
-                    out.write("    push rbx\n")
+                    out.write("    pop {r1}\n")
+                    out.write("    ldr r2, [r1]\n")
+                    out.write("    and r2, #0xff\n")
+                    out.write("    push {r2}\n")
                 elif op.operand == Intrinsic.STORE8:
-                    out.write("    pop rax\n");
-                    out.write("    pop rbx\n");
-                    out.write("    mov [rax], bl\n");
+                    out.write("    pop {r1, r2}\n");
+                    out.write("    and r2, #0xff\n")
+                    out.write("    str r2, [r1]\n");
                 elif op.operand == Intrinsic.LOAD16:
-                    out.write("    pop rax\n")
-                    out.write("    xor rbx, rbx\n")
-                    out.write("    mov bx, [rax]\n")
-                    out.write("    push rbx\n")
+                    pass
+                    # out.write("    pop rax\n")
+                    # out.write("    xor rbx, rbx\n")
+                    # out.write("    mov bx, [rax]\n")
+                    # out.write("    push rbx\n")
                 elif op.operand == Intrinsic.STORE16:
-                    out.write("    pop rax\n");
-                    out.write("    pop rbx\n");
-                    out.write("    mov [rax], bx\n");
+                    pass
+                    # out.write("    pop rax\n");
+                    # out.write("    pop rbx\n");
+                    # out.write("    mov [rax], bx\n");
                 elif op.operand == Intrinsic.LOAD32:
-                    out.write("    pop rax\n")
-                    out.write("    xor rbx, rbx\n")
-                    out.write("    mov ebx, [rax]\n")
-                    out.write("    push rbx\n")
+                    pass
+                    # out.write("    pop rax\n")
+                    # out.write("    xor rbx, rbx\n")
+                    # out.write("    mov ebx, [rax]\n")
+                    # out.write("    push rbx\n")
                 elif op.operand == Intrinsic.STORE32:
-                    out.write("    pop rax\n");
-                    out.write("    pop rbx\n");
-                    out.write("    mov [rax], ebx\n");
+                    pass
+                    # out.write("    pop rax\n");
+                    # out.write("    pop rbx\n");
+                    # out.write("    mov [rax], ebx\n");
                 elif op.operand == Intrinsic.LOAD64:
-                    out.write("    pop rax\n")
-                    out.write("    xor rbx, rbx\n")
-                    out.write("    mov rbx, [rax]\n")
-                    out.write("    push rbx\n")
+                    pass
+                    # out.write("    pop rax\n")
+                    # out.write("    xor rbx, rbx\n")
+                    # out.write("    mov rbx, [rax]\n")
+                    # out.write("    push rbx\n")
                 elif op.operand == Intrinsic.STORE64:
-                    out.write("    pop rax\n");
-                    out.write("    pop rbx\n");
-                    out.write("    mov [rax], rbx\n");
-                # elif op.operand == Intrinsic.ARGC:
+                    pass
+                    # out.write("    pop rax\n");
+                    # out.write("    pop rbx\n");
+                    # out.write("    mov [rax], rbx\n");
+                elif op.operand == Intrinsic.ARGC:
+                    pass
                     # out.write("    mov rax, [args_ptr]\n")
                     # out.write("    mov rax, [rax]\n")
                     # out.write("    push rax\n")
-                # elif op.operand == Intrinsic.ARGV:
+                elif op.operand == Intrinsic.ARGV:
+                    pass
                     # out.write("    mov rax, [args_ptr]\n")
                     # out.write("    add rax, 8\n")
                     # out.write("    push rax\n")
-                # elif op.operand == Intrinsic.ENVP:
+                elif op.operand == Intrinsic.ENVP:
+                    pass
                     # out.write("    mov rax, [args_ptr]\n")
                     # out.write("    mov rax, [rax]\n")
                     # out.write("    add rax, 2\n")
@@ -1139,7 +1145,8 @@ def generate_nasm_linux_arm32(program: Program, out_file_path: str):
                     # out.write("    mov rbx, [args_ptr]\n")
                     # out.write("    add rbx, rax\n")
                     # out.write("    push rbx\n")
-                # elif op.operand == Intrinsic.HERE:
+                elif op.operand == Intrinsic.HERE:
+                    pass
                     # value = ("%s:%d:%d" % op.token.loc).encode('utf-8')
                     # n = len(value)
                     # out.write("    mov rax, %d\n" % n)
