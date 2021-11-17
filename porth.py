@@ -1007,50 +1007,48 @@ def generate_gas_linux_arm32(program: Program, out_file_path: str):
                     out.write("    push {r2}\n")
                 elif op.operand == Intrinsic.MUL:
                     out.write("// MUL\n")
-                    out.write("    pop rax\n")
-                    out.write("    pop rbx\n")
-                    out.write("    mul rbx\n")
-                    out.write("    push rax\n")
+                    out.write("    pop {r1, r2}\n")
+                    out.write("    mul r1, r2, r1\n")
+                    out.write("    push {r1}\n")
                 elif op.operand == Intrinsic.MAX:
-                    out.write("    pop rax\n")
-                    out.write("    pop rbx\n")
-                    out.write("    cmp rbx, rax\n")
-                    out.write("    cmovge rax, rbx\n")
-                    out.write("    push rax\n")
+                    out.write("    pop {r1, r2}\n")
+                    out.write("    cmp r1, r2\n");
+                    out.write("    bge BL_%d\n" % ip);
+                    out.write("    mov r1, r2\n");
+                    out.write("BL_%d:\n" % ip);
+                    out.write("    push {r1}\n")
                 elif op.operand == Intrinsic.DIVMOD:
-                    out.write("    xor rdx, rdx\n")
-                    out.write("    pop rbx\n")
-                    out.write("    pop rax\n")
-                    out.write("    div rbx\n")
-                    out.write("    push rax\n");
-                    out.write("    push rdx\n");
+                    out.write("// DIVMOD\n")
+                    # out.write("    xor rdx, rdx\n")
+                    # out.write("    pop rbx\n")
+                    # out.write("    pop rax\n")
+                    # out.write("    div rbx\n")
+                    # out.write("    push rax\n");
+                    # out.write("    push rdx\n");
                 elif op.operand == Intrinsic.SHR:
-                    out.write("    pop rcx\n")
-                    out.write("    pop rbx\n")
-                    out.write("    shr rbx, cl\n")
-                    out.write("    push rbx\n")
+                    out.write("    pop {r1, r2}\n")
+                    out.write("    mov r2, r1, asr r2\n")
+                    out.write("    push {r2}\n")
                 elif op.operand == Intrinsic.SHL:
-                    out.write("    pop rcx\n")
-                    out.write("    pop rbx\n")
-                    out.write("    shl rbx, cl\n")
-                    out.write("    push rbx\n")
+                    out.write("    pop {r1, r2}\n")
+                    out.write("    mov r2, r1, asl r2\n")
+                    out.write("    push {r2}\n")
                 elif op.operand == Intrinsic.OR:
-                    out.write("    pop rax\n")
-                    out.write("    pop rbx\n")
-                    out.write("    or rbx, rax\n")
-                    out.write("    push rbx\n")
+                    out.write("    pop {r1, r2}\n")
+                    out.write("    orr r2, r1, r2\n")
+                    out.write("    push {r2}\n")
                 elif op.operand == Intrinsic.AND:
-                    out.write("    pop rax\n")
-                    out.write("    pop rbx\n")
-                    out.write("    and rbx, rax\n")
-                    out.write("    push rbx\n")
+                    out.write("    pop {r1, r2}\n")
+                    out.write("    and r2, r1, r2\n")
+                    out.write("    push {r2}\n")
                 elif op.operand == Intrinsic.NOT:
-                    out.write("    pop rax\n")
-                    out.write("    not rax\n")
-                    out.write("    push rax\n")
-                elif op.operand == Intrinsic.PRINT:
-                    out.write("    pop rdi\n")
-                    out.write("    call print\n")
+                    out.write("    pop {r1}\n")
+                    out.write("    rsbs r1, r1, #1\n")
+                    out.write("    movcc r1, #0\n")
+                    out.write("    push {r1}\n")
+                # elif op.operand == Intrinsic.PRINT:
+                    # out.write("    pop rdi\n")
+                    # out.write("    call print\n")
                 elif op.operand == Intrinsic.EQ:
                     out.write("    pop {r1}\n");
                     out.write("    pop {r2}\n");
@@ -1061,45 +1059,34 @@ def generate_gas_linux_arm32(program: Program, out_file_path: str):
                     out.write("BL_%d:\n" % ip);
                     out.write("    push {r1}\n")
                 elif op.operand == Intrinsic.GT:
-                    out.write("    mov rcx, 0\n");
-                    out.write("    mov rdx, 1\n");
-                    out.write("    pop rbx\n");
-                    out.write("    pop rax\n");
-                    out.write("    cmp rax, rbx\n");
-                    out.write("    cmovg rcx, rdx\n");
-                    out.write("    push rcx\n")
+                    out.write("    pop {r1, r2}\n")
+                    out.write("    cmp r1, r2\n")
+                    out.write("    movle r1, #0\n")
+                    out.write("    movgt r1, #1\n")
+                    out.write("    push {r1}\n")
                 elif op.operand == Intrinsic.LT:
-                    out.write("    mov rcx, 0\n");
-                    out.write("    mov rdx, 1\n");
-                    out.write("    pop rbx\n");
-                    out.write("    pop rax\n");
-                    out.write("    cmp rax, rbx\n");
-                    out.write("    cmovl rcx, rdx\n");
-                    out.write("    push rcx\n")
+                    out.write("    pop {r1, r2}\n")
+                    out.write("    cmp r1, r2\n")
+                    out.write("    movge r1, #0\n")
+                    out.write("    movlt r1, #1\n")
+                    out.write("    push {r1}\n")
                 elif op.operand == Intrinsic.GE:
-                    out.write("    mov rcx, 0\n");
-                    out.write("    mov rdx, 1\n");
-                    out.write("    pop rbx\n");
-                    out.write("    pop rax\n");
-                    out.write("    cmp rax, rbx\n");
-                    out.write("    cmovge rcx, rdx\n");
-                    out.write("    push rcx\n")
+                    out.write("    pop {r1, r2}\n")
+                    out.write("    cmp r1, r2\n")
+                    out.write("    movlt r1, #0\n")
+                    out.write("    movge r1, #1\n")
+                    out.write("    push {r1}\n")
                 elif op.operand == Intrinsic.LE:
-                    out.write("    mov rcx, 0\n");
-                    out.write("    mov rdx, 1\n");
-                    out.write("    pop rbx\n");
-                    out.write("    pop rax\n");
-                    out.write("    cmp rax, rbx\n");
-                    out.write("    cmovle rcx, rdx\n");
-                    out.write("    push rcx\n")
+                    out.write("    pop {r1, r2}\n")
+                    out.write("    cmp r1, r2\n")
+                    out.write("    movgt r1, #0\n")
+                    out.write("    movle r1, #1\n")
+                    out.write("    push {r1}\n")
                 elif op.operand == Intrinsic.NE:
-                    out.write("    mov rcx, 0\n")
-                    out.write("    mov rdx, 1\n")
-                    out.write("    pop rbx\n")
-                    out.write("    pop rax\n")
-                    out.write("    cmp rax, rbx\n")
-                    out.write("    cmovne rcx, rdx\n")
-                    out.write("    push rcx\n")
+                    out.write("    pop {r1, r2}\n")
+                    out.write("    subs r1, r1, r2\n")
+                    out.write("    movne r1, #1\n")
+                    out.write("    push {r1}\n")
                 elif op.operand == Intrinsic.DUP:
                     out.write("    pop rax\n")
                     out.write("    push rax\n")
