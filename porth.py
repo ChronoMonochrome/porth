@@ -1172,59 +1172,54 @@ def generate_gas_linux_arm32(program: Program, out_file_path: str):
                     # strs.append(value)
                 elif op.operand in [Intrinsic.CAST_PTR, Intrinsic.CAST_INT, Intrinsic.CAST_BOOL]:
                     pass
-                # elif op.operand == Intrinsic.SYSCALL0:
-                    # out.write("    pop rax\n")
-                    # out.write("    syscall\n")
-                    # out.write("    push rax\n")
-                # elif op.operand == Intrinsic.SYSCALL1:
-                    # out.write("    pop rax\n")
-                    # out.write("    pop rdi\n")
-                    # out.write("    syscall\n")
-                    # out.write("    push rax\n")
-                # elif op.operand == Intrinsic.SYSCALL2:
-                    # out.write("    pop rax\n");
-                    # out.write("    pop rdi\n");
-                    # out.write("    pop rsi\n");
-                    # out.write("    syscall\n");
-                    # out.write("    push rax\n")
+                elif op.operand == Intrinsic.SYSCALL0:
+                    out.write("// SYSCALL0\n")
+                    out.write("    pop {r7}\n")
+                    out.write("    swi 0\n")
+                    out.write("    push {r1}\n")
+                elif op.operand == Intrinsic.SYSCALL1:
+                    out.write("// SYSCALL1\n")
+                    out.write("    pop {r7}\n")
+                    out.write("    pop {r0}\n")
+                    out.write("    swi 0\n")
+                    out.write("    push {r1}\n")
+                elif op.operand == Intrinsic.SYSCALL2:
+                    out.write("// SYSCALL2\n")
+                    out.write("    pop {r7}\n")
+                    out.write("    pop {r0, r1}\n")
+                    out.write("    swi 0\n")
+                    out.write("    push {r1}\n")
                 elif op.operand == Intrinsic.SYSCALL3:
                     out.write("// SYSCALL3\n")
                     out.write("    pop {r7}\n")
                     out.write("    pop {r0, r1, r2}\n")
                     out.write("    swi 0\n")
                     out.write("    push {r1}\n")
-                # elif op.operand == Intrinsic.SYSCALL4:
-                    # out.write("    pop rax\n")
-                    # out.write("    pop rdi\n")
-                    # out.write("    pop rsi\n")
-                    # out.write("    pop rdx\n")
-                    # out.write("    pop r10\n")
-                    # out.write("    syscall\n")
-                    # out.write("    push rax\n")
-                # elif op.operand == Intrinsic.SYSCALL5:
-                    # out.write("    pop rax\n")
-                    # out.write("    pop rdi\n")
-                    # out.write("    pop rsi\n")
-                    # out.write("    pop rdx\n")
-                    # out.write("    pop r10\n")
-                    # out.write("    pop r8\n")
-                    # out.write("    syscall\n")
-                    # out.write("    push rax\n")
-                # elif op.operand == Intrinsic.SYSCALL6:
-                    # out.write("    pop rax\n")
-                    # out.write("    pop rdi\n")
-                    # out.write("    pop rsi\n")
-                    # out.write("    pop rdx\n")
-                    # out.write("    pop r10\n")
-                    # out.write("    pop r8\n")
-                    # out.write("    pop r9\n")
-                    # out.write("    syscall\n")
-                    # out.write("    push rax\n")
+                elif op.operand == Intrinsic.SYSCALL4:
+                    out.write("// SYSCALL4\n")
+                    out.write("    pop {r7}\n")
+                    out.write("    pop {r0, r1, r2, r3}\n")
+                    out.write("    swi 0\n")
+                    out.write("    push {r1}\n")
+                elif op.operand == Intrinsic.SYSCALL5:
+                    out.write("// SYSCALL5\n")
+                    out.write("    pop {r7}\n")
+                    out.write("    pop {r0, r1, r2, r3, r4}\n")
+                    out.write("    swi 0\n")
+                    out.write("    push {r1}\n")
+                elif op.operand == Intrinsic.SYSCALL6:
+                    out.write("// SYSCALL6\n")
+                    out.write("    pop {r7}\n")
+                    out.write("    pop {r0, r1, r2, r3, r4, r5}\n")
+                    out.write("    swi 0\n")
+                    out.write("    push {r1}\n")
                 elif op.operand == Intrinsic.STOP:
                     pass
                 else:
+                    out.write("// UNREACHABLE ip=%d op.operand = %s" % (ip, str(op.operand)))
                     assert False, "unreachable"
             else:
+                out.write("// UNREACHABLE ip=%d op.typ = %s" % (ip, str(op.typ)))
                 assert False, "unreachable"
 
         out.write("addr_%d:\n" % len(program.ops))
