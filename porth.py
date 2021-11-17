@@ -842,6 +842,7 @@ def generate_nasm_linux_x86_64(program: Program, out_file_path: str):
 def generate_nasm_linux_arm32(program: Program, out_file_path: str):
     strs: List[bytes] = []
     with open(out_file_path, "w") as out:
+        out.write(".comm mem, %d, 4\n" % program.memory_capacity)
         out.write(".text\n")
         # out.write("print:\n")
         # out.write("    mov     r9, -3689348814741910323\n")
@@ -910,10 +911,10 @@ def generate_nasm_linux_arm32(program: Program, out_file_path: str):
                 strs.append(value)
             elif op.typ == OpType.PUSH_MEM:
                 out.write("// PUSH_MEM\n")
-                # assert isinstance(op.operand, MemAddr), "This could be a bug in the parsing step"
-                # out.write("    mov rax, mem\n")
-                # out.write("    add rax, %d\n" % op.operand)
-                # out.write("    push rax\n")
+                assert isinstance(op.operand, MemAddr), "This could be a bug in the parsing step"
+                out.write("    ldr r1, =mem\n")
+                out.write("    add r1, #%d\n" % op.operand)
+                out.write("    push {r1}\n")
             elif op.typ == OpType.PUSH_LOCAL_MEM:
                 out.write("// PUSH_LOCAL_MEM\n")
                 # assert isinstance(op.operand, MemAddr)
@@ -1221,6 +1222,7 @@ def generate_nasm_linux_arm32(program: Program, out_file_path: str):
         out.write("addr_%d:\n" % len(program.ops))
         out.write("    mov r7, #1\n")
         out.write("    swi 0\n")
+        out.write(".word mem\n")
         out.write(".data\n")
         for index, s in enumerate(strs):
             out.write("str_%d: .asciz \"%s\"\n" % (index, repr(s.decode("u8"))[1:-1]))
@@ -1229,7 +1231,6 @@ def generate_nasm_linux_arm32(program: Program, out_file_path: str):
         #out.write("ret_stack_rsp: resq 1\n")
         #out.write("ret_stack: resb %d\n" % X86_64_RET_STACK_CAP)
         #out.write("ret_stack_end:\n")
-        #out.write("mem: resb %d\n" % program.memory_capacity)
 
 assert len(Keyword) == 16, f"Exhaustive KEYWORD_NAMES definition. {len(Keyword)}"
 KEYWORD_BY_NAMES: Dict[str, Keyword] = {
