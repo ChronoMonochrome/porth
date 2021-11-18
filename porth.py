@@ -1206,6 +1206,7 @@ def generate_nasm_linux_arm32(program: Program, out_file_path: str):
                 assert False, "unreachable"
 
         out.write("addr_%d:\n" % len(program.ops))
+        out.write("    mov r0, #0\n")
         out.write("    mov r7, #1\n")
         out.write("    swi 0\n")
         out.write(".word mem\n")
