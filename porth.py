@@ -2240,8 +2240,8 @@ if __name__ == '__main__' and '__file__' in globals():
         if not silent:
             print("[INFO] Generating %s" % (basepath + ".asm"))
         generate_gas_linux_arm32(program, basepath + ".asm")
-        cmd_call_echoed(["arm-none-eabi-as", basepath + ".asm", "-o", basepath + ".o"], silent)
-        cmd_call_echoed(["arm-none-eabi-ld", basepath + ".o", "-o", basepath], silent)
+        cmd_call_echoed(["arm-linux-gnueabi-as", basepath + ".asm", "-o", basepath + ".o"], silent)
+        cmd_call_echoed(["arm-linux-gnueabi-ld", basepath + ".o", "-o", basepath], silent)
         if run:
             exit(cmd_call_echoed([basepath] + argv, silent))
     elif subcommand == "help":
