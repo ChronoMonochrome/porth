@@ -1029,11 +1029,11 @@ def generate_nasm_linux_arm32(program: Program, out_file_path: str):
                     # out.write("    push rdx\n");
                 elif op.operand == Intrinsic.SHR:
                     out.write("    pop {r1, r2}\n")
-                    out.write("    mov r2, r1, asr r2\n")
+                    out.write("    lsr r2, r2, r1\n")
                     out.write("    push {r2}\n")
                 elif op.operand == Intrinsic.SHL:
                     out.write("    pop {r1, r2}\n")
-                    out.write("    mov r2, r1, asl r2\n")
+                    out.write("    lsl r2, r2, r1\n")
                     out.write("    push {r2}\n")
                 elif op.operand == Intrinsic.OR:
                     out.write("    pop {r1, r2}\n")
