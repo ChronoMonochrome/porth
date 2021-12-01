@@ -970,7 +970,7 @@ def generate_gas_linux_arm32(program: Program, out_file_path: str):
                 out.write("    pop {r1}\n")
                 out.write("    tst r1, r1\n")
                 assert isinstance(op.operand, OpAddr), f"This could be a bug in the parsing step {op.operand}"
-                out.write("    bne addr_%d\n" % op.operand)
+                out.write("    beq addr_%d\n" % op.operand)
             elif op.typ == OpType.SKIP_PROC:
                 out.write("// SKIP_PROC\n")
                 assert isinstance(op.operand, OpAddr), f"This could be a bug in the parsing step: {op.operand}"
@@ -1057,32 +1057,32 @@ def generate_gas_linux_arm32(program: Program, out_file_path: str):
                     out.write("    pop {r1}\n");
                     out.write("    pop {r2}\n");
                     out.write("    cmp r1, r2\n");
-                    out.write("    mov r1, #0\n");
-                    out.write("    beq BL_%d\n" % ip);
                     out.write("    mov r1, #1\n");
+                    out.write("    beq BL_%d\n" % ip);
+                    out.write("    mov r1, #0\n");
                     out.write("BL_%d:\n" % ip);
                     out.write("    push {r1}\n")
                 elif op.operand == Intrinsic.GT:
                     out.write("    pop {r1, r2}\n")
-                    out.write("    cmp r1, r2\n")
+                    out.write("    cmp r2, r1\n")
                     out.write("    movle r1, #0\n")
                     out.write("    movgt r1, #1\n")
                     out.write("    push {r1}\n")
                 elif op.operand == Intrinsic.LT:
                     out.write("    pop {r1, r2}\n")
-                    out.write("    cmp r1, r2\n")
+                    out.write("    cmp r2, r1\n")
                     out.write("    movge r1, #0\n")
                     out.write("    movlt r1, #1\n")
                     out.write("    push {r1}\n")
                 elif op.operand == Intrinsic.GE:
                     out.write("    pop {r1, r2}\n")
-                    out.write("    cmp r1, r2\n")
+                    out.write("    cmp r2, r1\n")
                     out.write("    movlt r1, #0\n")
                     out.write("    movge r1, #1\n")
                     out.write("    push {r1}\n")
                 elif op.operand == Intrinsic.LE:
                     out.write("    pop {r1, r2}\n")
-                    out.write("    cmp r1, r2\n")
+                    out.write("    cmp r2, r1\n")
                     out.write("    movgt r1, #0\n")
                     out.write("    movle r1, #1\n")
                     out.write("    push {r1}\n")
@@ -1102,9 +1102,11 @@ def generate_gas_linux_arm32(program: Program, out_file_path: str):
                 elif op.operand == Intrinsic.DROP:
                     out.write("    pop {r1}\n")
                 elif op.operand == Intrinsic.OVER:
-                    out.write("    pop {r1, r2}\n")
+                    out.write("    pop {r2}\n")
+                    out.write("    pop {r1}\n")
+                    out.write("    push {r1}\n")
                     out.write("    push {r2}\n")
-                    out.write("    push {r1, r2}\n")
+                    out.write("    push {r1}\n")
                 elif op.operand == Intrinsic.ROT:
                     out.write("    pop {r1, r2, r3}\n")
                     out.write("    push {r2}\n")
