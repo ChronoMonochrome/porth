@@ -27,8 +27,8 @@ inline proc !int int ptr in !64 end
 // Stolen from https://filippo.io/linux-syscall-table/
 // Not all of the syscalls here are useful/implemented. I literally just copy-pasted them.
 // We can clean this up later.
-const SYS_read 0 end
-const SYS_write 1 end
+const SYS_read 3 end
+const SYS_write 4 end
 const SYS_open 2 end
 const SYS_close 3 end
 const SYS_stat 4 end
