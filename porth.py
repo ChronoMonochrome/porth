@@ -1815,7 +1815,7 @@ def generate_nasm_linux_arm32(program: Program, out_file_path: str):
         out.write(".word ret_stack_offset\n")
         out.write(".data\n")
         for index, s in enumerate(strs):
-            out.write("str_%d: .asciz \"%s\"\n" % (index, repr(s.decode("u8"))[1:-1]))
+            out.write("str_%d: .asciz \"%s\"\n" % (index, repr(s.decode("u8"))[1:-1].replace("\"", "\\\"")))
         out.write(".bss\n")
         #out.write("args_ptr: resq 1\n")
         #out.write("ret_stack_rsp: resq 1\n")
