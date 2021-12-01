@@ -502,7 +502,7 @@ def simulate_little_endian_linux(program: Program, argv: List[str]):
                     arg1 = stack.pop()
                     arg2 = stack.pop()
                     arg3 = stack.pop()
-                    if syscall_number == 0: # SYS_read
+                    if syscall_number == 3: # SYS_read
                         fd = arg1
                         buf = arg2
                         count = arg3
@@ -512,7 +512,7 @@ def simulate_little_endian_linux(program: Program, argv: List[str]):
                         data = fds[fd].readline(count)
                         mem[buf:buf+len(data)] = data
                         stack.append(len(data))
-                    elif syscall_number == 1: # SYS_write
+                    elif syscall_number == 4: # SYS_write
                         fd = arg1
                         buf = arg2
                         count = arg3
