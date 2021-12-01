@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <unistd.h>
 
-#define BUF_CAP 32
+#define BUF_CAP 33
 
 // https://stackoverflow.com/questions/5558492/divide-by-10-using-bit-shifts
 inline int32_t div10(int32_t dividend)
@@ -13,8 +13,13 @@ inline int32_t div10(int32_t dividend)
 
 void dump(int32_t x)
 {
+    int sign = x < 0;
     char buf[BUF_CAP];
+
     size_t buf_sz = 1;
+
+    if (sign)
+        x = abs(x);
 
     buf[sizeof(buf) - buf_sz] = '\n';
     do {
@@ -23,11 +28,14 @@ void dump(int32_t x)
         x = div10(x);
     } while (x);
 
-    return write(1, &buf[sizeof(buf) - buf_sz], buf_sz);
+    if (sign)
+        buf[sizeof(buf) - buf_sz - sign] = '-';
+
+    write(1, &buf[sizeof(buf) - buf_sz - sign], buf_sz + sign);
 }
 
 int main()
 {
-    dump(294967219);
+    dump(19);
     return 0;
 }
