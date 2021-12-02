@@ -1209,43 +1209,43 @@ def generate_gas_linux_arm32(program: Program, out_file_path: str):
                     out.write("// SYSCALL0\n")
                     out.write("    pop {r7}\n")
                     out.write("    swi 0\n")
-                    out.write("    push {r1}\n")
+                    out.write("    push {r0}\n")
                 elif op.operand == Intrinsic.SYSCALL1:
                     out.write("// SYSCALL1\n")
                     out.write("    pop {r7}\n")
                     out.write("    pop {r0}\n")
                     out.write("    swi 0\n")
-                    out.write("    push {r1}\n")
+                    out.write("    push {r0}\n")
                 elif op.operand == Intrinsic.SYSCALL2:
                     out.write("// SYSCALL2\n")
                     out.write("    pop {r7}\n")
                     out.write("    pop {r0, r1}\n")
                     out.write("    swi 0\n")
-                    out.write("    push {r1}\n")
+                    out.write("    push {r0}\n")
                 elif op.operand == Intrinsic.SYSCALL3:
                     out.write("// SYSCALL3\n")
                     out.write("    pop {r7}\n")
                     out.write("    pop {r0, r1, r2}\n")
                     out.write("    swi 0\n")
-                    out.write("    push {r1}\n")
+                    out.write("    push {r0}\n")
                 elif op.operand == Intrinsic.SYSCALL4:
                     out.write("// SYSCALL4\n")
                     out.write("    pop {r7}\n")
                     out.write("    pop {r0, r1, r2, r3}\n")
                     out.write("    swi 0\n")
-                    out.write("    push {r1}\n")
+                    out.write("    push {r0}\n")
                 elif op.operand == Intrinsic.SYSCALL5:
                     out.write("// SYSCALL5\n")
                     out.write("    pop {r7}\n")
                     out.write("    pop {r0, r1, r2, r3, r4}\n")
                     out.write("    swi 0\n")
-                    out.write("    push {r1}\n")
+                    out.write("    push {r0}\n")
                 elif op.operand == Intrinsic.SYSCALL6:
                     out.write("// SYSCALL6\n")
                     out.write("    pop {r7}\n")
                     out.write("    pop {r0, r1, r2, r3, r4, r5}\n")
                     out.write("    swi 0\n")
-                    out.write("    push {r1}\n")
+                    out.write("    push {r0}\n")
                 elif op.operand == Intrinsic.STOP:
                     pass
                 else:
