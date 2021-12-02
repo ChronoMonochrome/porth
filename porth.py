@@ -1095,8 +1095,8 @@ def generate_nasm_linux_arm32(program: Program, out_file_path: str):
                     out.write("    push {r1}\n")
                 elif op.operand == Intrinsic.SWAP:
                     out.write("    pop {r1, r2}\n")
-                    out.write("    push {r2}\n")
                     out.write("    push {r1}\n")
+                    out.write("    push {r2}\n")
                 elif op.operand == Intrinsic.DROP:
                     out.write("    pop {r1}\n")
                 elif op.operand == Intrinsic.OVER:
