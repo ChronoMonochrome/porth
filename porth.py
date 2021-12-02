@@ -867,6 +867,8 @@ def generate_gas_linux_arm32(program: Program, out_file_path: str):
     strs: List[bytes] = []
     with open(out_file_path, "w") as out:
         out.write(".comm mem, %d, 4\n" % program.memory_capacity)
+        out.write(".comm ret_stack, %d, 4\n" % 4096)
+        out.write(".comm ret_stack_offset, 4, 4\n")
         out.write(".text\n")
         out.write("print:\n")
         out.write("    mov	r3, #10\n")
@@ -893,7 +895,6 @@ def generate_gas_linux_arm32(program: Program, out_file_path: str):
         out.write("    add	r3, sp, #32\n")
         out.write("    sub	r1, r3, r2 \n")
         out.write("    mov	r0, #1\n")
-        #out.write("    bl	write      \n")
         out.write("    mov  r7, #4\n")
         out.write("    swi 0\n")
         out.write("    add	sp, sp, #36\n")
@@ -977,6 +978,13 @@ def generate_gas_linux_arm32(program: Program, out_file_path: str):
                 out.write("    b addr_%d\n" % op.operand)
             elif op.typ == OpType.PREP_PROC:
                 out.write("// PREP_PROC\n")
+                out.write("    ldr r1, =ret_stack\n")
+                out.write("    ldr r2, =ret_stack_offset\n")
+                out.write("    ldr r3, [r2]\n")
+                out.write("    add r1, r1, r3\n")
+                out.write("    str lr, [r1]\n")
+                out.write("    add r3, r3, #4\n")
+                out.write("    str r3, [r2]\n")
                 assert isinstance(op.operand, int)
                 # out.write("    sub rsp, %d\n" % op.operand)
                 # out.write("    mov [ret_stack_rsp], rsp\n")
@@ -984,6 +992,7 @@ def generate_gas_linux_arm32(program: Program, out_file_path: str):
             elif op.typ == OpType.CALL:
                 out.write("// CALL\n")
                 assert isinstance(op.operand, OpAddr), f"This could be a bug in the parsing step: {op.operand}"
+                out.write("    bl addr_%d\n" % op.operand)
                 # out.write("    mov rax, rsp\n")
                 # out.write("    mov rsp, [ret_stack_rsp]\n")
                 # out.write("    call addr_%d\n" % op.operand)
@@ -991,6 +1000,15 @@ def generate_gas_linux_arm32(program: Program, out_file_path: str):
                 # out.write("    mov rsp, rax\n")
             elif op.typ == OpType.RET:
                 out.write("// RET\n")
+                out.write("    ldr r1, =ret_stack\n")
+                out.write("    ldr r2, =ret_stack_offset\n")
+                out.write("    ldr r3, [r2]\n")
+                out.write("    sub r3, r3, #4\n")
+                out.write("    add r1, r1, r3\n")
+                out.write("    ldr r4, [r1]\n")
+                out.write("    str r3, [r2]\n")
+                out.write("    bx r4\n")
+                out.write("    .ltorg\n")
                 assert isinstance(op.operand, int)
                 # out.write("    mov rax, rsp\n")
                 # out.write("    mov rsp, [ret_stack_rsp]\n")
@@ -1238,6 +1256,8 @@ def generate_gas_linux_arm32(program: Program, out_file_path: str):
         out.write("    mov r7, #1\n")
         out.write("    swi 0\n")
         out.write(".word mem\n")
+        out.write(".word ret_stack\n")
+        out.write(".word ret_stack_offset\n")
         out.write(".data\n")
         for index, s in enumerate(strs):
             out.write("str_%d: .asciz \"%s\"\n" % (index, repr(s.decode("u8"))[1:-1]))
