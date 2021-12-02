@@ -919,14 +919,14 @@ def generate_gas_linux_arm32(program: Program, out_file_path: str):
             if op.typ in [OpType.PUSH_INT, OpType.PUSH_BOOL, OpType.PUSH_PTR]:
                 assert isinstance(op.operand, int), f"This could be a bug in the parsing step {op.operand}"
                 out.write("// [OpType.PUSH_INT, OpType.PUSH_BOOL, OpType.PUSH_PTR]\n")
-                out.write("    movw r1, #%d\n" % (int(op.operand) & 0xFFFF))
+                out.write("    ldr r1, =%d\n" % op.operand)
                 out.write("    push {r1}\n")
             elif op.typ == OpType.PUSH_STR:
                 out.write("// PUSH_STR\n")
                 assert isinstance(op.operand, str), "This could be a bug in the parsing step"
                 value = op.operand.encode('utf-8')
-                n = len(value) & 0xFFFF
-                out.write("    movw r1, #%d\n" % n)
+                n = len(value)
+                out.write("    ldr r1, =%d\n" % n)
                 out.write("    push {r1}\n")
                 out.write("    ldr r1, =str_%d\n" % len(strs))
                 out.write("    push {r1}\n")
