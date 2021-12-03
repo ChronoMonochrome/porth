@@ -450,7 +450,7 @@ inline proc mod int int -- int in % end
 inline proc div int int -- int in / end
 
 inline proc nth_argv int -- ptr in
-  8 * argv +ptr @64 cast(ptr)
+  4 * argv +ptr @32 cast(ptr)
 end
 
 inline proc lnot bool -- bool in
