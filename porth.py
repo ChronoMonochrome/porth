@@ -843,6 +843,8 @@ def generate_nasm_linux_arm32(program: Program, out_file_path: str):
     strs: List[bytes] = []
     with open(out_file_path, "w") as out:
         out.write(".comm mem, %d, 4\n" % program.memory_capacity)
+        out.write(".comm argc, 4, 4\n")
+        out.write(".comm args_ptr, 4, 4\n")
         out.write(".comm ret_stack, %d, 4\n" % 4096)
         out.write(".comm ret_stack_offset, 4, 4\n")
         out.write(".text\n")
@@ -902,9 +904,12 @@ def generate_nasm_linux_arm32(program: Program, out_file_path: str):
         out.write("    .size    print, .-print\n")
         out.write(".global _start\n")
         out.write("_start:\n")
-        #out.write("    mov [args_ptr], rsp\n")
-        #out.write("    mov rax, ret_stack_end\n")
-        #out.write("    mov [ret_stack_rsp], rax\n")
+        out.write("    ldr r4, =argc\n")
+        out.write("    ldr r1, [sp]\n")
+        out.write("    str r1, [r4]\n")
+        out.write("    add r1, sp, #4\n")
+        out.write("    ldr r4, =args_ptr\n")
+        out.write("    str r1, [r4]\n")
         out.write("// ----------------------\n")
         for ip in range(len(program.ops)):
             op = program.ops[ip]
@@ -1182,15 +1187,13 @@ def generate_nasm_linux_arm32(program: Program, out_file_path: str):
                     out.write("    pop {r1, r2}\n");
                     out.write("    str r2, [r1]\n");
                 elif op.operand == Intrinsic.ARGC:
-                    pass
-                    # out.write("    mov rax, [args_ptr]\n")
-                    # out.write("    mov rax, [rax]\n")
-                    # out.write("    push rax\n")
+                    out.write("    ldr r1, =argc\n")
+                    out.write("    ldr r1, [r1]\n")
+                    out.write("    push {r1}\n")
                 elif op.operand == Intrinsic.ARGV:
-                    pass
-                    # out.write("    mov rax, [args_ptr]\n")
-                    # out.write("    add rax, 8\n")
-                    # out.write("    push rax\n")
+                    out.write("    ldr r1, =args_ptr\n")
+                    out.write("    ldr r1, [r1]\n")
+                    out.write("    push {r1}\n")
                 elif op.operand == Intrinsic.ENVP:
                     pass
                     # out.write("    mov rax, [args_ptr]\n")
