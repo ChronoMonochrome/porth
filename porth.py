@@ -1545,7 +1545,7 @@ def generate_nasm_linux_arm32(program: Program, out_file_path: str):
                 out.write("    pop {r1}\n")
                 out.write("    tst r1, r1\n")
                 assert isinstance(op.operand, OpAddr), f"This could be a bug in the parsing step {op.operand}"
-                out.write("    bne addr_%d\n" % op.operand)
+                out.write("    beq addr_%d\n" % op.operand)
             elif op.typ == OpType.WHILE:
                 pass
             elif op.typ == OpType.ELSE:
