@@ -1770,14 +1770,14 @@ def generate_nasm_linux_arm32(program: Program, out_file_path: str):
                     out.write("    ldr r1, [r1]\n")
                     out.write("    push {r1}\n")
                 elif op.operand == Intrinsic.ENVP:
-                    pass
-                    # out.write("    mov rax, [args_ptr]\n")
-                    # out.write("    mov rax, [rax]\n")
-                    # out.write("    add rax, 2\n")
-                    # out.write("    shl rax, 3\n")
-                    # out.write("    mov rbx, [args_ptr]\n")
-                    # out.write("    add rbx, rax\n")
-                    # out.write("    push rbx\n")
+                    out.write("    ldr r1, =args_ptr\n")
+                    out.write("    ldr r1, [r1]\n")
+                    out.write("    ldr r2, =argc\n")
+                    out.write("    ldr r2, [r2]\n")
+                    out.write("    lsl r2, r2, #2\n")
+                    out.write("    add r1, r1, r2\n")
+                    out.write("    add r1, r1, #4\n")
+                    out.write("    push {r1}\n")
                 elif op.operand == Intrinsic.HERE:
                     pass
                     # value = ("%s:%d:%d" % op.token.loc).encode('utf-8')
