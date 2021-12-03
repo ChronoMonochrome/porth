@@ -1481,7 +1481,9 @@ def generate_nasm_linux_arm32(program: Program, out_file_path: str):
                 out.write("    push {r1}\n")
                 out.write("    ldr r1, =str_%d\n" % len(strs))
                 out.write("    push {r1}\n")
+                out.write("    b lbl_%d\n" % ip)
                 out.write("    .ltorg\n")
+                out.write("lbl_%d:\n" % ip)
                 strs.append(value)
             elif op.typ == OpType.PUSH_CSTR:
                 out.write("// PUSH_CSTR\n")
@@ -1489,7 +1491,9 @@ def generate_nasm_linux_arm32(program: Program, out_file_path: str):
                 value = op.operand.encode('utf-8') + b'\0'
                 out.write("    ldr r1, =str_%d\n" % len(strs))
                 out.write("    push {r1}\n")
+                out.write("    b lbl_%d\n" % ip)
                 out.write("    .ltorg\n")
+                out.write("lbl_%d:\n" % ip)
                 strs.append(value)
             elif op.typ == OpType.PUSH_MEM:
                 out.write("// PUSH_MEM\n")
@@ -1498,7 +1502,9 @@ def generate_nasm_linux_arm32(program: Program, out_file_path: str):
                 out.write("    ldr r2, =%d\n" % op.operand)
                 out.write("    add r1, r1, r2\n")
                 out.write("    push {r1}\n")
+                out.write("    b lbl_%d\n" % ip)
                 out.write("    .ltorg\n")
+                out.write("lbl_%d:\n" % ip)
             elif op.typ == OpType.PUSH_LOCAL_MEM:
                 out.write("// PUSH_LOCAL_MEM\n")
                 assert isinstance(op.operand, MemAddr)
@@ -1540,7 +1546,9 @@ def generate_nasm_linux_arm32(program: Program, out_file_path: str):
                 out.write("    str lr, [r1]\n")
                 out.write("    add r3, r3, #4\n")
                 out.write("    str r3, [r2]\n")
+                out.write("    b lbl_%d\n" % ip)
                 out.write("    .ltorg\n")
+                out.write("lbl_%d:\n" % ip)
                 assert isinstance(op.operand, int)
                 # out.write("    sub rsp, %d\n" % op.operand)
                 # out.write("    mov [ret_stack_rsp], rsp\n")
