@@ -867,6 +867,7 @@ def generate_gas_linux_arm32(program: Program, out_file_path: str):
     strs: List[bytes] = []
     with open(out_file_path, "w") as out:
         out.write(".comm mem, %d, 4\n" % program.memory_capacity)
+        out.write(".comm local_mem, %d, 4\n" % 8192)
         out.write(".comm argc, 4, 4\n")
         out.write(".comm args_ptr, 4, 4\n")
         out.write(".comm ret_stack, %d, 4\n" % 4096)
@@ -981,9 +982,13 @@ def generate_gas_linux_arm32(program: Program, out_file_path: str):
             elif op.typ == OpType.PUSH_LOCAL_MEM:
                 out.write("// PUSH_LOCAL_MEM\n")
                 assert isinstance(op.operand, MemAddr)
-                # out.write("    mov rax, [ret_stack_rsp]\n");
-                # out.write("    add rax, %d\n" % op.operand)
-                # out.write("    push rax\n")
+                out.write("    ldr r1, =local_mem\n")
+                out.write("    ldr r2, =%d\n" % op.operand)
+                out.write("    add r1, r1, r2\n")
+                out.write("    push {r1}\n")
+                out.write("    b lbl_%d\n" % ip)
+                out.write("    .ltorg\n")
+                out.write("lbl_%d:\n" % ip)
             elif op.typ in [OpType.IF, OpType.IFSTAR]:
                 out.write("// IF\n")
                 out.write("    pop {r1}\n")
@@ -1292,6 +1297,7 @@ def generate_gas_linux_arm32(program: Program, out_file_path: str):
         out.write("    mov r7, #1\n")
         out.write("    swi 0\n")
         out.write(".word mem\n")
+        out.write(".word local_mem\n")
         out.write(".word ret_stack\n")
         out.write(".word ret_stack_offset\n")
         out.write(".data\n")
