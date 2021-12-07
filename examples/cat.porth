@@ -24,7 +24,7 @@ else
   1 while dup argc < do
     dup nth_argv !file_path_cstr
 
-    0 O_RDONLY @file_path_cstr AT_FDCWD openat
+    0 O_RDONLY @file_path_cstr open
     
     dup 0 < if
       "ERROR: could not open file " eputs
