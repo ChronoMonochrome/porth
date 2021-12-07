@@ -5,7 +5,7 @@ const false 0 cast(bool) end
 
 const sizeof(u64) 8 end
 const sizeof(u32) 4 end
-const sizeof(ptr) sizeof(u64) end
+const sizeof(ptr) sizeof(u32) end
 const sizeof(bool) sizeof(u64) end
 const sizeof(int) sizeof(u64) end
 
