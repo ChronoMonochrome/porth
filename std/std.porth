@@ -32,7 +32,7 @@ const SYS_write 4 end
 const SYS_open 5 end
 const SYS_close 6 end
 const SYS_stat 4 end
-const SYS_fstat 5 end
+const SYS_fstat 108 end
 const SYS_lstat 6 end
 const SYS_poll 7 end
 const SYS_lseek 8 end
