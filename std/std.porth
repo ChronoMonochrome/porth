@@ -431,6 +431,7 @@ const sizeof(stat.st_ctim) sizeof(timespec) end
 // Wrappers for common syscalls
 inline proc write int ptr int -- int in SYS_write syscall3 end
 inline proc read int ptr int -- int in SYS_read syscall3 end
+inline proc open int int ptr -- int in SYS_open syscall3 end
 inline proc openat int int ptr int -- int in SYS_openat syscall4 end
 inline proc fstat ptr int -- int in SYS_fstat syscall2 end
 inline proc stat ptr ptr -- int in SYS_stat syscall2 end
