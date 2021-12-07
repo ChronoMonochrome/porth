@@ -479,7 +479,7 @@ def simulate_little_endian_linux(program: Program, argv: List[str]):
                     ip += 1
                 elif op.operand == Intrinsic.SYSCALL0:
                     syscall_number = stack.pop();
-                    if syscall_number == 39: # SYS_getpid
+                    if syscall_number == 20: # SYS_getpid
                         stack.append(os.getpid());
                     else:
                         assert False, "unknown syscall number %d" % syscall_number
@@ -487,9 +487,9 @@ def simulate_little_endian_linux(program: Program, argv: List[str]):
                 elif op.operand == Intrinsic.SYSCALL1:
                     syscall_number = stack.pop()
                     arg1 = stack.pop()
-                    if syscall_number == 60: # SYS_exit
+                    if syscall_number == 1: # SYS_exit
                         exit(arg1)
-                    elif syscall_number == 3: # SYS_close
+                    elif syscall_number == 6: # SYS_close
                         fds[arg1].close()
                         stack.append(0)
                     else:
@@ -519,7 +519,7 @@ def simulate_little_endian_linux(program: Program, argv: List[str]):
                         fds[fd].write(mem[buf:buf+count])
                         fds[fd].flush()
                         stack.append(count)
-                    elif syscall_number == 59: # SYS_execve
+                    elif syscall_number == 11: # SYS_execve
                         execve_path = get_cstr_from_mem(mem, arg1).decode('utf-8')
                         execve_argv = get_cstr_list_from_mem(mem, arg2)
                         execve_envp = { k: v for s in get_cstr_list_from_mem(mem, arg3) for (k, v) in (s.split('='), ) }
@@ -550,7 +550,7 @@ def simulate_little_endian_linux(program: Program, argv: List[str]):
                         nano_seconds = int.from_bytes(mem[request_ptr+8:request_ptr+8+8], byteorder='little')
                         sleep(float(seconds)+float(nano_seconds)*1e-09)
                         stack.append(0)
-                    elif syscall_number == 257: # SYS_openat
+                    elif syscall_number == 342: # SYS_openat
                         dirfd = arg1
                         pathname_ptr = arg2
                         flags = arg3
