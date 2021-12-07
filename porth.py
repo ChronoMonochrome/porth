@@ -144,6 +144,7 @@ MemAddr=int
 class Op:
     typ: OpType
     token: Token
+    token2: Optional[Token] = None
     operand: Optional[Union[int, str, Intrinsic, OpAddr]] = None
 
 @dataclass
@@ -1563,11 +1564,11 @@ def generate_nasm_linux_arm32(program: Program, out_file_path: str):
                 assert isinstance(op.operand, OpAddr), f"This could be a bug in the parsing step {op.operand}"
                 out.write("    beq addr_%d\n" % op.operand)
             elif op.typ == OpType.SKIP_PROC:
-                out.write("// SKIP_PROC\n")
+                out.write("// SKIP_PROC %s\n" % (op.token2.value))
                 assert isinstance(op.operand, OpAddr), f"This could be a bug in the parsing step: {op.operand}"
                 out.write("    b addr_%d\n" % op.operand)
             elif op.typ == OpType.PREP_PROC:
-                out.write("// PREP_PROC\n")
+                out.write("// PREP_PROC %s\n" % op.token2.value)
                 out.write("    ldr r1, =ret_stack\n")
                 out.write("    ldr r2, =ret_stack_offset\n")
                 out.write("    ldr r3, [r2]\n")
@@ -2463,30 +2464,31 @@ def parse_program_from_tokens(ctx: ParseContext, tokens: List[Token], include_pa
                     ctx.current_proc.local_memory_capacity += memory_size
             elif token.value == Keyword.PROC:
                 if ctx.current_proc is None:
-                    ctx.ops.append(Op(typ=OpType.SKIP_PROC, token=token))
+                    if len(rtokens) == 0:
+                        compiler_error(token.loc, "expected procedure name but found nothing")
+                        exit(1)
+                    token2 = rtokens.pop()
+
+                    ctx.ops.append(Op(typ=OpType.SKIP_PROC, token=token, token2=token2))
                     ctx.stack.append(ctx.ip)
                     ctx.ip += 1
 
                     proc_addr = ctx.ip
-                    ctx.ops.append(Op(typ=OpType.PREP_PROC, token=token))
+                    ctx.ops.append(Op(typ=OpType.PREP_PROC, token=token, token2=token2))
                     ctx.stack.append(ctx.ip)
                     ctx.ip += 1
 
-                    if len(rtokens) == 0:
-                        compiler_error(token.loc, "expected procedure name but found nothing")
+                    if token2.typ != TokenType.WORD:
+                        compiler_error(token2.loc, "expected procedure name to be %s but found %s" % (human(TokenType.WORD), human(token2.typ)))
                         exit(1)
-                    token = rtokens.pop()
-                    if token.typ != TokenType.WORD:
-                        compiler_error(token.loc, "expected procedure name to be %s but found %s" % (human(TokenType.WORD), human(token.typ)))
-                        exit(1)
-                    assert isinstance(token.value, str), "This is probably a bug in the lexer"
-                    proc_loc = token.loc
-                    proc_name = token.value
-                    check_name_redefinition(ctx, token.value, token.loc)
+                    assert isinstance(token2.value, str), "This is probably a bug in the lexer"
+                    proc_loc = token2.loc
+                    proc_name = token2.value
+                    check_name_redefinition(ctx, token2.value, token2.loc)
 
                     proc_contract = parse_proc_contract(rtokens)
 
-                    ctx.procs[proc_name] = Proc(addr=proc_addr, loc=token.loc, local_memories={}, local_memory_capacity=0, contract=proc_contract)
+                    ctx.procs[proc_name] = Proc(addr=proc_addr, loc=token2.loc, local_memories={}, local_memory_capacity=0, contract=proc_contract)
                     ctx.current_proc = ctx.procs[proc_name]
                 else:
                     # TODO: forbid constant definition inside of proc
