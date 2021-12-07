@@ -145,7 +145,8 @@ proc put_glider ptr in
 end
 
 proc main in
-  100000000 delta_time 8 ptr+ !64
+  //1 delta_time 0 + !64
+  100000000 delta_time 4 ptr+ !64
 
   board_current put_glider
 
