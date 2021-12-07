@@ -537,7 +537,7 @@ def simulate_little_endian_linux(program: Program, argv: List[str]):
                     arg3 = stack.pop()
                     arg4 = stack.pop()
 
-                    if syscall_number == 230: # clock_nanosleep
+                    if syscall_number == 265: # clock_nanosleep
                         clock_id = arg1
                         flags = arg2
                         request_ptr = arg3
