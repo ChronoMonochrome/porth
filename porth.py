@@ -1917,6 +1917,7 @@ def generate_nasm_linux_arm32(program: Program, out_file_path: str):
                     out.write("    pop {r10}\n")
                     out.write("    ldr r2, [r1]\n")
                     out.write("    and r2, #0xff\n")
+                    out.write("    mov r9, #0\n")
                     out.write("    push {r9}\n")
                     out.write("    push {r2}\n")
                 elif op.operand == Intrinsic.STORE8:
@@ -1937,6 +1938,7 @@ def generate_nasm_linux_arm32(program: Program, out_file_path: str):
                     out.write("    ldr r2, [r1]\n")
                     out.write("    ldr r3, =0xffff\n")
                     out.write("    and r2, r3\n")
+                    out.write("    mov r9, #0\n")
                     out.write("    push {r9}\n")
                     out.write("    push {r2}\n")
                 elif op.operand == Intrinsic.STORE16:
@@ -1951,6 +1953,7 @@ def generate_nasm_linux_arm32(program: Program, out_file_path: str):
                     out.write("    pop {r1}\n")
                     out.write("    pop {r10}\n")
                     out.write("    ldr r2, [r1]\n")
+                    out.write("    mov r9, #0\n")
                     out.write("    push {r9}\n")
                     out.write("    push {r2}\n")
                 elif op.operand == Intrinsic.STORE32:
@@ -1963,6 +1966,8 @@ def generate_nasm_linux_arm32(program: Program, out_file_path: str):
                     out.write("    pop {r1}\n")
                     out.write("    pop {r10}\n")
                     out.write("    ldr r2, [r1]\n")
+                    out.write("    add r1, #4\n")
+                    out.write("    ldr r9, [r1]\n")
                     out.write("    push {r9}\n")
                     out.write("    push {r2}\n")
                 elif op.operand == Intrinsic.STORE64:
@@ -1971,6 +1976,8 @@ def generate_nasm_linux_arm32(program: Program, out_file_path: str):
                     out.write("    pop {r2}\n")
                     out.write("    pop {r9}\n")
                     out.write("    str r2, [r1]\n");
+                    out.write("    add r1, #4\n")
+                    out.write("    str r9, [r1]\n");
                 elif op.operand == Intrinsic.ARGC:
                     out.write("    ldr r1, =argc\n")
                     out.write("    ldr r1, [r1]\n")
