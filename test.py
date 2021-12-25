@@ -109,7 +109,7 @@ def run_test_for_file(file_path: str, stats: RunStats = RunStats()):
             error = True
             stats.porth_py_failed += 1
 
-        com = cmd_run_echoed(["./porth", "com", "-r", "-s", file_path, *tc.argv], input=tc.stdin, capture_output=True)
+        com = cmd_run_echoed([sys.executable, "./porth.py", "com", "-r", "-s", file_path, *tc.argv], input=tc.stdin, capture_output=True)
         if com.returncode != tc.returncode or com.stdout != tc.stdout or com.stderr != tc.stderr:
             print("[ERROR] Unexpected output")
             print("  Expected:")
