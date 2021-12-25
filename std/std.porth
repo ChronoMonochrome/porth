@@ -255,7 +255,7 @@ const SYS_timer_gettime 224 end
 const SYS_timer_getoverrun 225 end
 const SYS_timer_delete 226 end
 const SYS_clock_settime 227 end
-const SYS_clock_gettime 228 end
+const SYS_clock_gettime 263 end
 const SYS_clock_getres 229 end
 const SYS_clock_nanosleep 265 end
 const SYS_exit_group 231 end
