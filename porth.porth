@@ -2247,7 +2247,6 @@ proc compile-file-into-ops ptr in
   file-path-cstr !64
 
   memory lexer sizeof(Lexer) end
-  sizeof(Lexer) 0 lexer memset drop
   file-path-cstr @ptr map-file    lexer Lexer.content   ptr+ !Str
   file-path-cstr @ptr cstr-to-str lexer Lexer.file-path ptr+ !Str
 
