@@ -994,9 +994,7 @@ in
   0                   // mode
   O_RDONLY            // flags
   file-path-cstr @ptr // pathname
-  // TODO: this is lame, let's just support negative numbers properly
-  0 100 - // AT_FDCWD            // dirfd
-  openat
+  open
 
   dup 0 < if
     "ERROR: could not open file " eputs file-path-cstr @ptr cstr-to-str eputs "\n" eputs
