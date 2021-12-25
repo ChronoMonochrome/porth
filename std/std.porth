@@ -399,34 +399,34 @@ inline proc ptr-diff ptr ptr -- int in
   -
 end
 
-const sizeof(stat) 144 end
+const sizeof(stat) 64 end
 inline proc stat.st_dev     ptr -- ptr in 0   ptr+ end
 inline proc stat.st_ino     ptr -- ptr in 8   ptr+ end
-inline proc stat.st_mode    ptr -- ptr in 24  ptr+ end
+inline proc stat.st_mode    ptr -- ptr in 12  ptr+ end
 inline proc stat.st_nlink   ptr -- ptr in 16  ptr+ end
-inline proc stat.st_uid     ptr -- ptr in 28  ptr+ end
-inline proc stat.st_gid     ptr -- ptr in 32  ptr+ end
-inline proc stat.st_rdev    ptr -- ptr in 40  ptr+ end
-inline proc stat.st_size    ptr -- ptr in 48  ptr+ end
+inline proc stat.st_uid     ptr -- ptr in 20  ptr+ end
+inline proc stat.st_gid     ptr -- ptr in 24  ptr+ end
+inline proc stat.st_rdev    ptr -- ptr in 32  ptr+ end
+inline proc stat.st_size    ptr -- ptr in 40  ptr+ end
 inline proc @stat.st_size   ptr -- int in stat.st_size @64 end
-inline proc stat.st_blksize ptr -- ptr in 56  ptr+ end
-inline proc stat.st_blocks  ptr -- ptr in 64  ptr+ end
-inline proc stat.st_atim    ptr -- ptr in 72  ptr+ end
-inline proc stat.st_mtim    ptr -- ptr in 88  ptr+ end
-inline proc stat.st_ctim    ptr -- ptr in 104 ptr+ end
+inline proc stat.st_blksize ptr -- ptr in 44  ptr+ end
+inline proc stat.st_blocks  ptr -- ptr in 48  ptr+ end
+inline proc stat.st_atim    ptr -- ptr in 52  ptr+ end
+inline proc stat.st_mtim    ptr -- ptr in 56  ptr+ end
+inline proc stat.st_ctim    ptr -- ptr in 60 ptr+ end
 const sizeof(stat.st_dev) sizeof(u64) end
 const sizeof(stat.st_ino) sizeof(u64) end
 const sizeof(stat.st_mode) sizeof(u32) end
-const sizeof(stat.st_nlink) sizeof(u64) end
+const sizeof(stat.st_nlink) sizeof(u32) end
 const sizeof(stat.st_uid) sizeof(u32) end
 const sizeof(stat.st_gid) sizeof(u32) end
 const sizeof(stat.st_rdev) sizeof(u64) end
-const sizeof(stat.st_size) sizeof(u64) end
-const sizeof(stat.st_blksize) sizeof(u64) end
-const sizeof(stat.st_blocks) sizeof(u64) end
-const sizeof(stat.st_atim) sizeof(timespec) end
-const sizeof(stat.st_mtim) sizeof(timespec) end
-const sizeof(stat.st_ctim) sizeof(timespec) end
+const sizeof(stat.st_size) sizeof(u32) end
+const sizeof(stat.st_blksize) sizeof(u32) end
+const sizeof(stat.st_blocks) sizeof(u32) end
+const sizeof(stat.st_atim) sizeof(u32) end
+const sizeof(stat.st_mtim) sizeof(u32) end
+const sizeof(stat.st_ctim) sizeof(u32) end
 
 // Wrappers for common syscalls
 inline proc write int ptr int -- int in SYS_write syscall3 end
