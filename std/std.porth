@@ -1024,10 +1024,10 @@ in
     cast(ptr)
     content !Str.data
 
-    content @Str.data cast(int) 0 < if
-      "ERROR: could not memory map file " eputs file-path-cstr @ptr cstr-to-str eputs "\n" eputs
-      1 exit
-    end
+    //content @Str.data cast(int) 0 < if
+    //  "ERROR: could not memory map file " eputs file-path-cstr @ptr cstr-to-str eputs "\n" eputs
+    //  1 exit
+    //end
 
     content @Str
   else
