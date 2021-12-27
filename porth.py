@@ -938,7 +938,7 @@ def generate_gas_linux_arm32(program: Program, out_file_path: str):
         out.write("// ----------------------\n")
         for ip in range(len(program.ops)):
             op = program.ops[ip]
-            assert len(OpType) == 18, "Exhaustive ops handling in generate_gas_linux_arm32"
+            assert len(OpType) == 19, "Exhaustive ops handling in generate_gas_linux_arm32"
             out.write("// ip = %d, op=%s\n" % (ip, str(op.typ)))
             out.write("addr_%d:\n" % ip)
             if op.typ in [OpType.PUSH_INT, OpType.PUSH_BOOL, OpType.PUSH_PTR]:
@@ -1028,18 +1028,13 @@ def generate_gas_linux_arm32(program: Program, out_file_path: str):
                 out.write("    .ltorg\n")
                 out.write("lbl_%d:\n" % ip)
                 assert isinstance(op.operand, int)
-                # out.write("    sub rsp, %d\n" % op.operand)
-                # out.write("    mov [ret_stack_rsp], rsp\n")
-                # out.write("    mov rsp, rax\n")
             elif op.typ == OpType.CALL:
                 out.write("// CALL\n")
                 assert isinstance(op.operand, OpAddr), f"This could be a bug in the parsing step: {op.operand}"
                 out.write("    bl addr_%d\n" % op.operand)
-                # out.write("    mov rax, rsp\n")
-                # out.write("    mov rsp, [ret_stack_rsp]\n")
-                # out.write("    call addr_%d\n" % op.operand)
-                # out.write("    mov [ret_stack_rsp], rsp\n")
-                # out.write("    mov rsp, rax\n")
+            elif op.typ == OpType.INLINED:
+                # ignored, it is needed purely for type checking
+                pass
             elif op.typ == OpType.RET:
                 out.write("// RET\n")
                 out.write("    ldr r1, =ret_stack\n")
