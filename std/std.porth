@@ -36,7 +36,7 @@ const SYS_fstat 108 end
 const SYS_lstat 6 end
 const SYS_poll 7 end
 const SYS_lseek 8 end
-const SYS_mmap 90 end
+const SYS_mmap 192 end
 const SYS_mprotect 10 end
 const SYS_munmap 11 end
 const SYS_brk 12 end
