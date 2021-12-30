@@ -284,7 +284,7 @@ const SYS_inotify_init 253 end
 const SYS_inotify_add_watch 254 end
 const SYS_inotify_rm_watch 255 end
 const SYS_migrate_pages 256 end
-const SYS_openat 342 end
+const SYS_openat 295 end
 const SYS_mkdirat 258 end
 const SYS_mknodat 259 end
 const SYS_fchownat 260 end
