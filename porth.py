@@ -863,6 +863,429 @@ def generate_nasm_linux_x86_64(program: Program, out_file_path: str):
         out.write("ret_stack_end:\n")
         out.write("mem: resb %d\n" % program.memory_capacity)
 
+def generate_nasm_linux_i386(program: Program, out_file_path: str):
+    strs: List[bytes] = []
+    with open(out_file_path, "w") as out:
+        out.write("segment .text\n")
+        out.write("print:\n")
+        out.write("    mov  edi, [buf]\n")
+        out.write("    push	ebp\n")
+        out.write("    mov	ebp, esp\n")
+        out.write("    push	ebx\n")
+        out.write("    sub	esp, 20\n")
+        out.write("    mov	eax, DWORD [ebp+8]\n")
+        out.write("    shr	eax, 31\n")
+        out.write("    movzx	eax, al\n")
+        out.write("    mov	DWORD [ebp-16], eax\n")
+        out.write("    mov	DWORD [ebp-12], 1\n")
+        out.write("    cmp	DWORD [ebp-16], 0\n")
+        out.write("    je	.L2\n")
+        out.write("    mov	eax, DWORD [ebp+8]\n")
+        out.write("    sar	eax, 31\n")
+        out.write("    xor	DWORD [ebp+8], eax\n")
+        out.write("    sub	DWORD [ebp+8], eax\n")
+        out.write(".L2:\n")
+        out.write("    mov	eax, 33\n")
+        out.write("    sub	eax, DWORD [ebp-12]\n")
+        out.write("    mov	byte[edi + eax], 10\n")
+        out.write(".L3:\n")
+        out.write("    mov	ecx, DWORD [ebp+8]\n")
+        out.write("    mov	edx, 1717986919\n")
+        out.write("    mov	eax, ecx\n")
+        out.write("    imul	edx\n")
+        out.write("    mov	eax, edx\n")
+        out.write("    sar	eax, 2\n")
+        out.write("    mov	ebx, ecx\n")
+        out.write("    sar	ebx, 31\n")
+        out.write("    sub	eax, ebx\n")
+        out.write("    mov	edx, eax\n")
+        out.write("    mov	eax, edx\n")
+        out.write("    sal	eax, 2\n")
+        out.write("    add	eax, edx\n")
+        out.write("    add	eax, eax\n")
+        out.write("    sub	ecx, eax\n")
+        out.write("    mov	edx, ecx\n")
+        out.write("    mov	eax, edx\n")
+        out.write("    lea	edx, [eax+48]\n")
+        out.write("    mov	eax, 32\n")
+        out.write("    sub	eax, DWORD [ebp-12]\n")
+        out.write("    mov	byte[edi + eax], dl\n")
+        out.write("    add	DWORD [ebp-12], 1\n")
+        out.write("    mov	ecx, DWORD [ebp+8]\n")
+        out.write("    mov	edx, 1717986919\n")
+        out.write("    mov	eax, ecx\n")
+        out.write("    imul	edx\n")
+        out.write("    mov	eax, edx\n")
+        out.write("    sar	eax, 2\n")
+        out.write("    sar	ecx, 31\n")
+        out.write("    mov	edx, ecx\n")
+        out.write("    sub	eax, edx\n")
+        out.write("    mov	DWORD [ebp+8], eax\n")
+        out.write("    cmp	DWORD [ebp+8], 0\n")
+        out.write("    jne	.L3\n")
+        out.write("    cmp	DWORD [ebp-16], 0\n")
+        out.write("    je	.L4\n")
+        out.write("    mov	edx, DWORD [ebp-16]\n")
+        out.write("    mov	eax, DWORD [ebp-12]\n")
+        out.write("    add	edx, eax\n")
+        out.write("    mov	eax, 33\n")
+        out.write("    sub	eax, edx\n")
+        out.write("    mov	byte[edi + eax], 45\n")
+        out.write(".L4:\n")
+        out.write("    mov	edx, DWORD [ebp-16]\n")
+        out.write("    mov	eax, DWORD [ebp-12]\n")
+        out.write("    add	edx, eax\n")
+        out.write("    mov	ecx, DWORD [ebp-16]\n")
+        out.write("    mov	eax, DWORD [ebp-12]\n")
+        out.write("    add	ecx, eax\n")
+        out.write("    mov	eax, 33\n")
+        out.write("    sub	eax, ecx\n")
+        out.write("    add	eax, buf\n")
+        out.write("    mov ecx, eax\n")
+        out.write("    mov eax, 4\n")
+        out.write("    mov ebx, 1\n")
+        out.write("    int 0x80\n")
+        out.write("    add	esp, 20\n")
+        out.write("    ret\n")
+        out.write("global _start\n")
+        out.write("_start:\n")
+        out.write("    mov [args_ptr], esp\n")
+        out.write("    mov eax, ret_stack_end\n")
+        out.write("    mov [ret_stack_esp], eax\n")
+        for ip in range(len(program.ops)):
+            op = program.ops[ip]
+            assert len(OpType) == 19, "Exhaustive ops handling in generate_nasm_linux_i386"
+            out.write("addr_%d:\n" % ip)
+            if op.typ in [OpType.PUSH_INT, OpType.PUSH_BOOL, OpType.PUSH_PTR]:
+                assert isinstance(op.operand, int), f"This could be a bug in the paesing step {op.operand}"
+                out.write("    mov eax, %d\n" % op.operand)
+                out.write("    push eax\n")
+            elif op.typ == OpType.PUSH_STR:
+                assert isinstance(op.operand, str), "This could be a bug in the paesing step"
+                value = op.operand.encode('utf-8')
+                n = len(value)
+                out.write("    mov eax, %d\n" % n)
+                out.write("    push eax\n")
+                out.write("    push str_%d\n" % len(strs))
+                strs.append(value)
+            elif op.typ == OpType.PUSH_CSTR:
+                assert isinstance(op.operand, str), "This could be a bug in the paesing step"
+                value = op.operand.encode('utf-8') + b'\0'
+                out.write("    push str_%d\n" % len(strs))
+                strs.append(value)
+            elif op.typ == OpType.PUSH_MEM:
+                assert isinstance(op.operand, MemAddr), "This could be a bug in the paesing step"
+                out.write("    mov eax, mem\n")
+                out.write("    add eax, %d\n" % op.operand)
+                out.write("    push eax\n")
+            elif op.typ == OpType.PUSH_LOCAL_MEM:
+                assert isinstance(op.operand, MemAddr)
+                out.write("    mov eax, [ret_stack_esp]\n");
+                out.write("    add eax, %d\n" % op.operand)
+                out.write("    push eax\n")
+            elif op.typ in [OpType.IF, OpType.IFSTAR]:
+                out.write("    pop eax\n")
+                out.write("    test eax, eax\n")
+                assert isinstance(op.operand, OpAddr), f"This could be a bug in the paesing step {op.operand}"
+                out.write("    jz addr_%d\n" % op.operand)
+            elif op.typ == OpType.WHILE:
+                pass
+            elif op.typ == OpType.ELSE:
+                assert isinstance(op.operand, OpAddr), "This could be a bug in the paesing step"
+                out.write("    jmp addr_%d\n" % op.operand)
+            elif op.typ == OpType.END:
+                assert isinstance(op.operand, int), "This could be a bug in the paesing step"
+                out.write("    jmp addr_%d\n" % op.operand)
+            elif op.typ == OpType.DO:
+                out.write("    pop eax\n")
+                out.write("    test eax, eax\n")
+                assert isinstance(op.operand, int), "This could be a bug in the paesing step"
+                out.write("    jz addr_%d\n" % op.operand)
+            elif op.typ == OpType.SKIP_PROC:
+                assert isinstance(op.operand, OpAddr), f"This could be a bug in the paesing step: {op.operand}"
+                out.write("    jmp addr_%d\n" % op.operand)
+            elif op.typ == OpType.PREP_PROC:
+                assert isinstance(op.operand, int)
+                out.write("    sub esp, %d\n" % op.operand)
+                out.write("    mov [ret_stack_esp], esp\n")
+                out.write("    mov esp, eax\n")
+            elif op.typ == OpType.CALL:
+                assert isinstance(op.operand, OpAddr), f"This could be a bug in the paesing step: {op.operand}"
+                out.write("    mov eax, esp\n")
+                out.write("    mov esp, [ret_stack_esp]\n")
+                out.write("    call addr_%d\n" % op.operand)
+                out.write("    mov [ret_stack_esp], esp\n")
+                out.write("    mov esp, eax\n")
+            elif op.typ == OpType.INLINED:
+                # ignored, it is needed purely for type checking
+                pass
+            elif op.typ == OpType.RET:
+                assert isinstance(op.operand, int)
+                out.write("    mov eax, esp\n")
+                out.write("    mov esp, [ret_stack_esp]\n")
+                out.write("    add esp, %d\n" % op.operand)
+                out.write("    ret\n")
+            elif op.typ == OpType.INTRINSIC:
+                assert len(Intrinsic) == 45, "Exhaustive intrinsic handling in generate_nasm_linux_i386()"
+                if op.operand == Intrinsic.PLUS:
+                    out.write("    pop eax\n")
+                    out.write("    pop ebx\n")
+                    out.write("    add eax, ebx\n")
+                    out.write("    push eax\n")
+                elif op.operand == Intrinsic.MINUS:
+                    out.write("    pop eax\n")
+                    out.write("    pop ebx\n")
+                    out.write("    sub ebx, eax\n")
+                    out.write("    push ebx\n")
+                elif op.operand == Intrinsic.MUL:
+                    out.write("    pop eax\n")
+                    out.write("    pop ebx\n")
+                    out.write("    mul ebx\n")
+                    out.write("    push eax\n")
+                elif op.operand == Intrinsic.MAX:
+                    out.write("    pop eax\n")
+                    out.write("    pop ebx\n")
+                    out.write("    cmp ebx, eax\n")
+                    out.write("    cmovge eax, ebx\n")
+                    out.write("    push eax\n")
+                elif op.operand == Intrinsic.DIVMOD:
+                    out.write("    xor edx, edx\n")
+                    out.write("    pop ebx\n")
+                    out.write("    pop eax\n")
+                    out.write("    div ebx\n")
+                    out.write("    push eax\n");
+                    out.write("    push edx\n");
+                elif op.operand == Intrinsic.SHR:
+                    out.write("    pop ecx\n")
+                    out.write("    pop ebx\n")
+                    out.write("    shr ebx, cl\n")
+                    out.write("    push ebx\n")
+                elif op.operand == Intrinsic.SHL:
+                    out.write("    pop ecx\n")
+                    out.write("    pop ebx\n")
+                    out.write("    shl ebx, cl\n")
+                    out.write("    push ebx\n")
+                elif op.operand == Intrinsic.OR:
+                    out.write("    pop eax\n")
+                    out.write("    pop ebx\n")
+                    out.write("    or ebx, eax\n")
+                    out.write("    push ebx\n")
+                elif op.operand == Intrinsic.AND:
+                    out.write("    pop eax\n")
+                    out.write("    pop ebx\n")
+                    out.write("    and ebx, eax\n")
+                    out.write("    push ebx\n")
+                elif op.operand == Intrinsic.NOT:
+                    out.write("    pop eax\n")
+                    out.write("    not eax\n")
+                    out.write("    push eax\n")
+                elif op.operand == Intrinsic.PRINT:
+                    #out.write("    pop eax\n")
+                    out.write("    call print\n")
+                elif op.operand == Intrinsic.EQ:
+                    out.write("    mov ecx, 0\n");
+                    out.write("    mov edx, 1\n");
+                    out.write("    pop eax\n");
+                    out.write("    pop ebx\n");
+                    out.write("    cmp eax, ebx\n");
+                    out.write("    cmove ecx, edx\n");
+                    out.write("    push ecx\n")
+                elif op.operand == Intrinsic.GT:
+                    out.write("    mov ecx, 0\n");
+                    out.write("    mov edx, 1\n");
+                    out.write("    pop ebx\n");
+                    out.write("    pop eax\n");
+                    out.write("    cmp eax, ebx\n");
+                    out.write("    cmovg ecx, edx\n");
+                    out.write("    push ecx\n")
+                elif op.operand == Intrinsic.LT:
+                    out.write("    mov ecx, 0\n");
+                    out.write("    mov edx, 1\n");
+                    out.write("    pop ebx\n");
+                    out.write("    pop eax\n");
+                    out.write("    cmp eax, ebx\n");
+                    out.write("    cmovl ecx, edx\n");
+                    out.write("    push ecx\n")
+                elif op.operand == Intrinsic.GE:
+                    out.write("    mov ecx, 0\n");
+                    out.write("    mov edx, 1\n");
+                    out.write("    pop ebx\n");
+                    out.write("    pop eax\n");
+                    out.write("    cmp eax, ebx\n");
+                    out.write("    cmovge ecx, edx\n");
+                    out.write("    push ecx\n")
+                elif op.operand == Intrinsic.LE:
+                    out.write("    mov ecx, 0\n");
+                    out.write("    mov edx, 1\n");
+                    out.write("    pop ebx\n");
+                    out.write("    pop eax\n");
+                    out.write("    cmp eax, ebx\n");
+                    out.write("    cmovle ecx, edx\n");
+                    out.write("    push ecx\n")
+                elif op.operand == Intrinsic.NE:
+                    out.write("    mov ecx, 0\n")
+                    out.write("    mov edx, 1\n")
+                    out.write("    pop ebx\n")
+                    out.write("    pop eax\n")
+                    out.write("    cmp eax, ebx\n")
+                    out.write("    cmovne ecx, edx\n")
+                    out.write("    push ecx\n")
+                elif op.operand == Intrinsic.DUP:
+                    out.write("    pop eax\n")
+                    out.write("    push eax\n")
+                    out.write("    push eax\n")
+                elif op.operand == Intrinsic.SWAP:
+                    out.write("    pop eax\n")
+                    out.write("    pop ebx\n")
+                    out.write("    push eax\n")
+                    out.write("    push ebx\n")
+                elif op.operand == Intrinsic.DROP:
+                    out.write("    pop eax\n")
+                elif op.operand == Intrinsic.OVER:
+                    out.write("    pop eax\n")
+                    out.write("    pop ebx\n")
+                    out.write("    push ebx\n")
+                    out.write("    push eax\n")
+                    out.write("    push ebx\n")
+                elif op.operand == Intrinsic.ROT:
+                    out.write("    pop eax\n")
+                    out.write("    pop ebx\n")
+                    out.write("    pop ecx\n")
+                    out.write("    push ebx\n")
+                    out.write("    push eax\n")
+                    out.write("    push ecx\n")
+                elif op.operand == Intrinsic.LOAD8:
+                    out.write("    pop eax\n")
+                    out.write("    xor ebx, ebx\n")
+                    out.write("    mov bl, [eax]\n")
+                    out.write("    push ebx\n")
+                elif op.operand == Intrinsic.STORE8:
+                    out.write("    pop eax\n");
+                    out.write("    pop ebx\n");
+                    out.write("    mov [eax], bl\n");
+                elif op.operand == Intrinsic.LOAD16:
+                    out.write("    pop eax\n")
+                    out.write("    xor ebx, ebx\n")
+                    out.write("    mov bx, [eax]\n")
+                    out.write("    push ebx\n")
+                elif op.operand == Intrinsic.STORE16:
+                    out.write("    pop eax\n");
+                    out.write("    pop ebx\n");
+                    out.write("    mov [eax], bx\n");
+                elif op.operand == Intrinsic.LOAD32:
+                    out.write("    pop eax\n")
+                    out.write("    xor ebx, ebx\n")
+                    out.write("    mov ebx, [eax]\n")
+                    out.write("    push ebx\n")
+                elif op.operand == Intrinsic.STORE32:
+                    out.write("    pop eax\n");
+                    out.write("    pop ebx\n");
+                    out.write("    mov [eax], ebx\n");
+                elif op.operand == Intrinsic.LOAD64:
+                    out.write("    pop eax\n")
+                    out.write("    xor ebx, ebx\n")
+                    out.write("    mov ebx, [eax]\n")
+                    out.write("    push ebx\n")
+                elif op.operand == Intrinsic.STORE64:
+                    out.write("    pop eax\n");
+                    out.write("    pop ebx\n");
+                    out.write("    mov [eax], ebx\n");
+                elif op.operand == Intrinsic.ARGC:
+                    out.write("    mov eax, [args_ptr]\n")
+                    out.write("    mov eax, [eax]\n")
+                    out.write("    push eax\n")
+                elif op.operand == Intrinsic.ARGV:
+                    out.write("    mov eax, [args_ptr]\n")
+                    out.write("    add eax, 4\n")
+                    out.write("    push eax\n")
+                elif op.operand == Intrinsic.ENVP:
+                    out.write("    mov eax, [args_ptr]\n")
+                    out.write("    mov eax, [eax]\n")
+                    out.write("    add eax, 2\n")
+                    out.write("    shl eax, 2\n")
+                    out.write("    mov ebx, [args_ptr]\n")
+                    out.write("    add ebx, eax\n")
+                    out.write("    push ebx\n")
+                elif op.operand == Intrinsic.HERE:
+                    value = ("%s:%d:%d" % op.token.loc).encode('utf-8')
+                    n = len(value)
+                    out.write("    mov eax, %d\n" % n)
+                    out.write("    push eax\n")
+                    out.write("    push str_%d\n" % len(strs))
+                    strs.append(value)
+                elif op.operand in [Intrinsic.CAST_PTR, Intrinsic.CAST_INT, Intrinsic.CAST_BOOL]:
+                    pass
+                elif op.operand == Intrinsic.SYSCALL0:
+                    out.write("    pop eax\n")
+                    out.write("    int 0x80\n")
+                    out.write("    push eax\n")
+                elif op.operand == Intrinsic.SYSCALL1:
+                    out.write("    pop eax\n")
+                    out.write("    pop ebx\n")
+                    out.write("    int 0x80\n")
+                    out.write("    push eax\n")
+                elif op.operand == Intrinsic.SYSCALL2:
+                    out.write("    pop eax\n")
+                    out.write("    pop ebx\n")
+                    out.write("    pop ecx\n")
+                    out.write("    int 0x80\n");
+                    out.write("    push eax\n")
+                elif op.operand == Intrinsic.SYSCALL3:
+                    out.write("    pop eax\n")
+                    out.write("    pop ebx\n")
+                    out.write("    pop ecx\n")
+                    out.write("    pop edx\n")
+                    out.write("    int 0x80\n")
+                    out.write("    push eax\n")
+                elif op.operand == Intrinsic.SYSCALL4:
+                    out.write("    pop eax\n")
+                    out.write("    pop ebx\n")
+                    out.write("    pop ecx\n")
+                    out.write("    pop edx\n")
+                    out.write("    pop esi\n")
+                    out.write("    int 0x80\n")
+                    out.write("    push eax\n")
+                elif op.operand == Intrinsic.SYSCALL5:
+                    out.write("    pop eax\n")
+                    out.write("    pop edi\n")
+                    out.write("    pop esi\n")
+                    out.write("    pop edx\n")
+                    out.write("    pop esi\n")
+                    out.write("    pop edi\n")
+                    out.write("    int 0x80\n")
+                    out.write("    push eax\n")
+                elif op.operand == Intrinsic.SYSCALL6:
+                    out.write("    pop eax\n")
+                    out.write("    pop edi\n")
+                    out.write("    pop esi\n")
+                    out.write("    pop edx\n")
+                    out.write("    pop esi\n")
+                    out.write("    pop edi\n")
+                    out.write("    pop ebp\n")
+                    out.write("    int 0x80\n")
+                    out.write("    push eax\n")
+                elif op.operand == Intrinsic.STOP:
+                    pass
+                else:
+                    assert False, "unreachable"
+            else:
+                assert False, "unreachable"
+
+        out.write("addr_%d:\n" % len(program.ops))
+        out.write("    mov eax, 1\n")
+        out.write("    mov ebx, 0\n")
+        out.write("    int 0x80\n")
+        out.write("segment .data\n")
+        for index, s in enumerate(strs):
+            out.write("str_%d: db %s\n" % (index, ','.join(map(str, list(s)))))
+        out.write("segment .bss\n")
+        out.write("args_ptr: resq 1\n")
+        out.write("ret_stack_esp: resq 1\n")
+        out.write("ret_stack: resb %d\n" % X86_64_RET_STACK_CAP)
+        out.write("ret_stack_end:\n")
+        out.write("mem: resb %d\n" % program.memory_capacity)
+        out.write("buf: resb 33\n")
+
 assert len(Keyword) == 16, f"Exhaustive KEYWORD_NAMES definition. {len(Keyword)}"
 KEYWORD_BY_NAMES: Dict[str, Keyword] = {
     'if': Keyword.IF,
@@ -1855,9 +2278,9 @@ if __name__ == '__main__' and '__file__' in globals():
             type_check_program(program, {proc.addr: proc for proc in parse_context.procs.values()})
         if not silent:
             print("[INFO] Generating %s" % (basepath + ".asm"))
-        generate_nasm_linux_x86_64(program, basepath + ".asm")
-        cmd_call_echoed(["nasm", "-felf64", basepath + ".asm"], silent)
-        cmd_call_echoed(["ld", "-o", basepath, basepath + ".o"], silent)
+        generate_nasm_linux_i386(program, basepath + ".asm")
+        cmd_call_echoed(["nasm", "-felf32", basepath + ".asm"], silent)
+        cmd_call_echoed(["ld", "-melf_i386", "-o", basepath, basepath + ".o"], silent)
         if run:
             exit(cmd_call_echoed([basepath] + argv, silent))
     elif subcommand == "help":
