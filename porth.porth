@@ -3767,7 +3767,7 @@ proc target-by-name int ptr -- int bool in
   end
 end
 
-memory args sizeof(ptr) end
+memory args sizeof(u32) end
 argv args !ptr
 
 proc main in
@@ -3781,7 +3781,7 @@ proc main in
   TARGET_NASM_LINUX_X86_64 target !int
 
   while
-    args sizeof(ptr) inc64-by
+    args sizeof(u32) inc64-by
     args @@ptr NULL ptr= if
       false // break
     else args @@ptr "-unsafe"c cstreq if*
@@ -3805,7 +3805,7 @@ proc main in
 
   args @@ptr "com"c cstreq if
     while
-      args sizeof(ptr) inc64-by
+      args sizeof(u32) inc64-by
       args @@ptr NULL ptr= if
         false // break
       else args @@ptr "-r"c cstreq if*
@@ -3817,7 +3817,7 @@ proc main in
         true silent !bool
         true  // continue
       else args @@ptr "-t"c cstreq if*
-        args sizeof(ptr) inc64-by
+        args sizeof(u32) inc64-by
         args @@ptr NULL ptr= if
           program @ptr stderr usage
           "ERROR: no argument is provided for parameter `-t`\n" eputs
@@ -3847,7 +3847,7 @@ proc main in
         true  // continue
       else
         args @@ptr file-path-cstr !ptr
-        args sizeof(ptr) inc64-by
+        args sizeof(u32) inc64-by
         false // break
       end
     do end
@@ -3911,7 +3911,7 @@ proc main in
       "./output"c tmp-append-ptr
       while args @@ptr NULL ptr!= do
         args @@ptr tmp-append-ptr
-        args sizeof(ptr) inc64-by
+        args sizeof(u32) inc64-by
       end
       NULL        tmp-append-ptr
       cmd-echoed
@@ -3920,7 +3920,7 @@ proc main in
     program @ptr stdout usage
     0 exit
   else args @@ptr "dump"c cstreq if*
-    args sizeof(ptr) inc64-by
+    args sizeof(u32) inc64-by
     args @@ptr NULL ptr= if
       program @ptr stderr usage
       "ERROR: no input file is provided for the `dump` subcommand\n" eputs
@@ -3932,7 +3932,7 @@ proc main in
 
     dump-ops
   else args @@ptr "lex"c cstreq if*
-    args sizeof(ptr) inc64-by
+    args sizeof(u32) inc64-by
     args @@ptr NULL ptr= if
       program @ptr stderr usage
       "ERROR: no input file is provided for the `lex` subcommand\n" eputs
@@ -3941,7 +3941,7 @@ proc main in
 
     args @@ptr lex-file
   else args @@ptr "summary"c cstreq if*
-    args sizeof(ptr) inc64-by
+    args sizeof(u32) inc64-by
     args @@ptr NULL ptr= if
       program @ptr stderr usage
       "ERROR: no input file is provided for the `dump` subcommand\n" eputs
