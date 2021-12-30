@@ -27,10 +27,10 @@ inline proc !int int ptr in !64 end
 // Stolen from https://filippo.io/linux-syscall-table/
 // Not all of the syscalls here are useful/implemented. I literally just copy-pasted them.
 // We can clean this up later.
-const SYS_read 0 end
-const SYS_write 1 end
-const SYS_open 2 end
-const SYS_close 3 end
+const SYS_read 3 end
+const SYS_write 4 end
+const SYS_open 5 end
+const SYS_close 6 end
 const SYS_stat 4 end
 const SYS_fstat 5 end
 const SYS_lstat 6 end
@@ -66,7 +66,7 @@ const SYS_nanosleep 35 end
 const SYS_getitimer 36 end
 const SYS_alarm 37 end
 const SYS_setitimer 38 end
-const SYS_getpid 39 end
+const SYS_getpid 20 end
 const SYS_sendfile 40 end
 const SYS_socket 41 end
 const SYS_connect 42 end
@@ -86,8 +86,8 @@ const SYS_getsockopt 55 end
 const SYS_clone 56 end
 const SYS_fork 57 end
 const SYS_vfork 58 end
-const SYS_execve 59 end
-const SYS_exit 60 end
+const SYS_execve 11 end
+const SYS_exit 1 end
 const SYS_wait4 61 end
 const SYS_kill 62 end
 const SYS_uname 63 end
@@ -255,9 +255,9 @@ const SYS_timer_gettime 224 end
 const SYS_timer_getoverrun 225 end
 const SYS_timer_delete 226 end
 const SYS_clock_settime 227 end
-const SYS_clock_gettime 228 end
+const SYS_clock_gettime 265 end
 const SYS_clock_getres 229 end
-const SYS_clock_nanosleep 230 end
+const SYS_clock_nanosleep 267 end
 const SYS_exit_group 231 end
 const SYS_epoll_wait 232 end
 const SYS_epoll_ctl 233 end
@@ -284,7 +284,7 @@ const SYS_inotify_init 253 end
 const SYS_inotify_add_watch 254 end
 const SYS_inotify_rm_watch 255 end
 const SYS_migrate_pages 256 end
-const SYS_openat 257 end
+const SYS_openat 342 end
 const SYS_mkdirat 258 end
 const SYS_mknodat 259 end
 const SYS_fchownat 260 end
